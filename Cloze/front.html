@@ -1,0 +1,62 @@
+<div class="anki-app-wrapper">
+    <div class="main-card content-container" id="front-outer">
+        <div id="front-content"></div>
+    </div>
+</div>
+
+<div id="raw-front" style="display:none;">{{cloze:Text}}</div>
+
+<script>
+    var getResources = [
+        getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+        getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
+        getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
+        getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
+        getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
+        getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
+        getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
+    ];
+
+    function getScript(path, altURL) { return new Promise((resolve) => { let s = document.createElement("script"); s.onload = resolve; s.onerror = () => { let s2 = document.createElement("script"); s2.onload = resolve; s2.src = altURL; document.head.appendChild(s2); }; s.src = path; document.head.appendChild(s); }) }
+    function getCSS(path, altURL) { return new Promise((resolve) => { let c = document.createElement('link'); c.rel = 'stylesheet'; c.onload = resolve; c.onerror = () => { let c2 = document.createElement('link'); c2.rel = 'stylesheet'; c2.href = altURL; document.head.appendChild(c2); }; c.href = path; document.head.appendChild(c); }); }
+
+    function cleanAnkiHTML(html) {
+        return html.replace(/<br\s*[\/]?>/gi, "\n").replace(/<div[^>]*>/gi, "\n").replace(/<\/div[^>]*>/g, "\n").replace(/&nbsp;/gi, " ").replace(/&gt;/gi, ">").replace(/&lt;/gi, "<").replace(/&amp;/gi, "&").trim();
+    }
+
+    function renderCloze() {
+        const source = document.getElementById('raw-front');
+        const target = document.getElementById('front-content');
+        if(!source || !target) return;
+
+        let rawText = cleanAnkiHTML(source.innerHTML);
+        let clozes = [];
+        
+        // Protect Clozes from Markdown
+        let protectedText = rawText.replace(/<span class="cloze[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            clozes.push(match);
+            return "CLOZETOKEN" + (clozes.length - 1) + "ENDTOKEN";
+        });
+
+        const md = new markdownit({ 
+            html: true, typographer: true,
+            highlight: (str, lang) => {
+                if (lang && typeof hljs !== 'undefined' && hljs.getLanguage(lang)) {
+                    try { return hljs.highlight(str, { language: lang }).value; } catch (__) {}
+                }
+                return '';
+            }
+        }).use(markdownItMark);
+
+        let rendered = md.render(protectedText);
+        
+        // Restore Clozes
+        target.innerHTML = rendered.replace(/CLOZETOKEN(\d+)ENDTOKEN/g, (match, index) => clozes[parseInt(index)]);
+
+        if (typeof renderMathInElement !== 'undefined') {
+            renderMathInElement(target, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}], throwOnError: false });
+        }
+    }
+
+    Promise.all(getResources).then(() => getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js")).then(renderCloze).catch(renderCloze);
+</script>

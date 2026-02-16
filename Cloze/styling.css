@@ -1,0 +1,63 @@
+@import url("_shigeSyntax.css");
+
+:root {
+    --bg: #1e1e2e;
+    --card-bg: #181825;
+    --text: #cdd6f4;
+    --subtext: #a6adc8;
+    --blue: #89b4fa;
+    --mauve: #cba6f7;
+    --green: #a6e3a1; /* Catppuccin Green */
+    --surface: #313244;
+    --border: #45475a;
+}
+
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
+.anki-app-wrapper { max-width: 850px; margin: auto; }
+
+.main-card { 
+    background: var(--card-bg); 
+    border: 1px solid var(--border); 
+    border-radius: 12px; 
+    padding: 25px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.separator { height: 1px; background: var(--border); margin: 25px 0; opacity: 0.3; }
+
+/* --- CLOZE STYLE --- */
+.cloze {
+    color: var(--green) !important;
+    font-weight: 800 !important;
+    background: transparent !important;
+    text-shadow: 0 0 10px rgba(166, 227, 161, 0.4);
+}
+
+/* --- FIXING GRAY BOX ARTIFACTS --- */
+code, pre, .hljs {
+    background-color: transparent !important;
+    -webkit-user-select: text !important;
+}
+
+pre {
+    background: #000000 !important;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin: 1.5em 0;
+}
+
+code {
+    font-family: 'Fira Code', monospace;
+    background: var(--surface);
+    color: #f9e2af; 
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* --- SYNTAX HIGHLIGHTING --- */
+.hljs-comment { color: #6c7086; font-style: italic; }
+.hljs-keyword { color: var(--mauve); }
+.hljs-string { color: var(--green); }
+.hljs-title { color: var(--blue); }
+.hljs-number { color: #fab387; }

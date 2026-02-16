@@ -1,0 +1,143 @@
+<div class="anki-app-wrapper">
+    <div class="main-card matching-container">
+        <div class="instruction-banner">
+            Click an item on the right, then click a box on the left to place it.
+        </div>
+        <div class="matching-grid">
+            <div id="drop-zones" class="left-col"></div>
+            <div id="item-pool" class="right-col"></div>
+        </div>
+    </div>
+</div>
+
+<div id="raw-data" style="display:none;">
+    <div class="field-entry">{{field1}}</div>
+    <div class="field-entry">{{field2}}</div>
+    <div class="field-entry">{{field3}}</div>
+    <div class="field-entry">{{field4}}</div>
+    <div class="field-entry">{{field5}}</div>
+    <div class="field-entry">{{field6}}</div>
+</div>
+
+<script>
+    var getResources = [
+        getCSS("_katex.css", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"),
+        getCSS("_highlight.css", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css"),
+        getScript("_highlight.js", "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js"),
+        getScript("_katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"),
+        getScript("_auto-render.js", "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js"),
+        getScript("_markdown-it.min.js", "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js"),
+        getScript("_markdown-it-mark.js","https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js")
+    ];
+
+    Promise.all(getResources).then(() => {
+        return getScript("_mhchem.js", "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js");
+    }).then(initMatching).catch(initMatching);
+
+    function getScript(path, altURL) { return new Promise((resolve, reject) => { let script = document.createElement("script"); script.onload = resolve; script.onerror = function() { let script_online = document.createElement("script"); script_online.onload = resolve; script_online.onerror = reject; script_online.src = altURL; document.head.appendChild(script_online); }; script.src = path; document.head.appendChild(script); }) }
+    function getCSS(path, altURL) { return new Promise((resolve, reject) => { var css = document.createElement('link'); css.setAttribute('rel', 'stylesheet'); css.type = 'text/css'; css.onload = resolve; css.onerror = function() { var css_online = document.createElement('link'); css_online.setAttribute('rel', 'stylesheet'); css_online.type = 'text/css'; css_online.onload = resolve; css_online.onerror = reject; css_online.href = altURL; document.head.appendChild(css_online); }; css.href = path; document.head.appendChild(css); }); }
+
+    function cleanAnkiHTML(html) {
+        return html.replace(/<br\s*[\/]?>/gi, "\n")
+                   .replace(/<div[^>]*>/gi, "\n")
+                   .replace(/<\/div[^>]*>/g, "\n")
+                   .replace(/&nbsp;/gi, " ")
+                   .replace(/&gt;/gi, ">")
+                   .replace(/&lt;/gi, "<")
+                   .replace(/&amp;/gi, "&")
+                   .trim();
+    }
+
+    function processContent(ID, rawHTML) {
+        let element = document.getElementById(ID);
+        if(!element) return;
+        let mdText = cleanAnkiHTML(rawHTML);
+        let md = new markdownit({ 
+            typographer: true, html: true,
+            highlight: function (str, lang) {
+                if (lang && typeof hljs !== 'undefined' && hljs.getLanguage(lang)) {
+                    try { return hljs.highlight(str, { language: lang }).value; } catch (__) {}
+                }
+                return '';
+            }
+        }).use(markdownItMark);
+        element.innerHTML = md.render(mdText);
+        if (typeof renderMathInElement !== 'undefined') {
+            renderMathInElement(element, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}], throwOnError: false });
+        }
+    }
+
+    let selectedChip = null;
+    let cardUniqueId = "";
+
+    function initMatching() {
+        const rawFields = document.querySelectorAll('.field-entry');
+        const leftCol = document.getElementById('drop-zones');
+        const rightCol = document.getElementById('item-pool');
+        let allItems = [];
+        let cardIdSeed = "";
+
+        rawFields.forEach((field, i) => {
+            let content = field.innerHTML.trim();
+            if(!content) return;
+            let parts = content.split(/==\*\*==/);
+            const groupId = `group-${i}`;
+            cardIdSeed += parts[0];
+
+            const groupWrapper = document.createElement('div');
+            groupWrapper.className = 'group-wrapper';
+            groupWrapper.innerHTML = `<div class="group-header" id="h-${i}"></div><div class="drop-zone" data-group-id="${groupId}"></div>`;
+            leftCol.appendChild(groupWrapper);
+            
+            processContent(`h-${i}`, parts[0]);
+            
+            const zone = groupWrapper.querySelector('.drop-zone');
+            zone.onclick = () => handleZoneClick(zone);
+
+            for(let j=1; j<parts.length; j++) {
+                allItems.push({ id: `item-${i}-${j}`, raw: parts[j], origin: groupId });
+            }
+        });
+
+        cardUniqueId = btoa(unescape(encodeURIComponent(cardIdSeed))).substring(0, 16);
+        allItems.sort(() => Math.random() - 0.5);
+        allItems.forEach(item => {
+            const chip = document.createElement('div');
+            chip.className = 'match-chip';
+            chip.id = item.id;
+            chip.dataset.origin = item.origin;
+            rightCol.appendChild(chip);
+            processContent(chip.id, item.raw);
+            chip.onclick = (e) => { e.stopPropagation(); handleChipClick(chip); };
+        });
+    }
+
+    function handleChipClick(chip) {
+        if(selectedChip) selectedChip.classList.remove('selected');
+        if(selectedChip === chip) { 
+            selectedChip = null; 
+            document.body.classList.remove('item-active'); 
+        } else { 
+            selectedChip = chip; 
+            chip.classList.add('selected'); 
+            document.body.classList.add('item-active'); 
+        }
+    }
+
+    function handleZoneClick(zone) {
+        if(!selectedChip) return;
+        zone.appendChild(selectedChip);
+        selectedChip.classList.remove('selected');
+        selectedChip = null;
+        document.body.classList.remove('item-active');
+        saveState();
+    }
+
+    function saveState() {
+        const state = {};
+        document.querySelectorAll('.drop-zone').forEach(z => {
+            state[z.dataset.groupId] = Array.from(z.children).map(c => c.id);
+        });
+        sessionStorage.setItem('match_' + cardUniqueId, JSON.stringify(state));
+    }
+</script>

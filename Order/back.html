@@ -1,0 +1,67 @@
+<div class="anki-app-wrapper">
+    <div class="main-card ordering-container">
+        <div class="instruction-banner result-banner">REVEALED ORDER</div>
+
+        <div class="result-section">
+            <h6 class="label">YOUR ATTEMPT</h6>
+            <div id="user-sequence" class="sequence-box results"></div>
+        </div>
+
+        <div class="result-section">
+            <h6 class="label">CORRECT ORDER</h6>
+            <div id="correct-sequence" class="sequence-box results"></div>
+        </div>
+
+        {{#note}}
+        <div id="note-wrapper" class="note-box">
+            <div class="note-label">NOTE</div>
+            <div id="note-content"></div>
+        </div>
+        <div id="raw-note" style="display:none;">{{note}}</div>
+        {{/note}}
+    </div>
+</div>
+
+<div id="raw-data" style="display:none;">{{order}}</div>
+
+<script>
+    // Copy cleanAnkiHTML and renderMarkdown helper functions from Front
+    
+    function revealResults() {
+        const raw = cleanAnkiHTML(document.getElementById('raw-data').innerHTML);
+        const items = raw.split(/==\*==|\n/).map(i => i.trim()).filter(i => i);
+        const cardId = btoa(unescape(encodeURIComponent(raw))).substring(0, 16);
+        const userState = JSON.parse(sessionStorage.getItem('order_' + cardId) || '[]');
+
+        const userContainer = document.getElementById('user-sequence');
+        const correctContainer = document.getElementById('correct-sequence');
+
+        items.forEach((content) => {
+            const chip = document.createElement('div');
+            chip.className = 'order-chip state-correct';
+            renderMarkdown(chip, content);
+            correctContainer.appendChild(chip);
+        });
+
+        userState.forEach((id, index) => {
+            const originalIdx = parseInt(id.split('-')[1]);
+            const isCorrect = originalIdx === index;
+            const chip = document.createElement('div');
+            chip.className = `order-chip ${isCorrect ? 'state-correct' : 'state-wrong'}`;
+            renderMarkdown(chip, items[originalIdx]);
+            userContainer.appendChild(chip);
+        });
+        
+        if(userState.length === 0) userContainer.innerHTML = "<div class='missed-text'>No items placed.</div>";
+
+        // Render Note
+        const rawNote = document.getElementById('raw-note');
+        const noteTarget = document.getElementById('note-content');
+        if(rawNote && noteTarget) renderMarkdown(noteTarget, cleanAnkiHTML(rawNote.innerHTML));
+
+        sessionStorage.removeItem('order_' + cardId);
+    }
+    
+    // Resource loading block same as front, then call revealResults
+    Promise.all(getResources).then(revealResults).catch(revealResults);
+</script>

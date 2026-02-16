@@ -1,0 +1,193 @@
+@import url("_shigeSyntax.css");
+
+/* =========================================
+   CATPPUCCIN MOCHA PALETTE & VARIABLES
+========================================= */
+:root {
+    --bg: #1e1e2e;          /* Base */
+    --card-bg: #181825;     /* Mantle */
+    --text: #cdd6f4;        /* Text */
+    --subtext: #a6adc8;     /* Subtext */
+    --blue: #89b4fa;        /* Blue */
+    --mauve: #cba6f7;       /* Mauve */
+    --green: #a6e3a1;       /* Green */
+    --red: #f38ba8;         /* Red */
+    --peach: #fab387;       /* Peach */
+    --teal: #94e2d5;        /* Teal */
+    --border: #45475a;      /* Surface1 */
+    --surface: #313244;     /* Surface0 */
+    --crust: #11111b;       /* Crust */
+}
+
+/* =========================================
+   CORE LAYOUT & RESET
+========================================= */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 15px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.anki-app-wrapper { max-width: 640px; margin: auto; }
+
+.main-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.tf-header {
+    text-align: center;
+    font-weight: 900;
+    font-size: 16px;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+}
+
+.txt-green { color: var(--green); }
+.txt-red { color: var(--red); }
+.sep { color: var(--border); margin: 0 8px; }
+
+/* =========================================
+   ITEM ROW & CONTROLS
+========================================= */
+.tf-row {
+    display: flex;
+    align-items: stretch;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    min-height: 60px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.tf-content {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tf-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    background: rgba(0,0,0,0.1);
+    border-left: 1px solid var(--border);
+}
+
+.tf-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 3px solid #6c7086;
+    color: #6c7086;
+    background: transparent;
+}
+
+.tf-btn.selected, .user-picked {
+    background: var(--blue) !important;
+    border-color: var(--blue) !important;
+    color: white !important;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(137, 180, 250, 0.4);
+}
+
+/* =========================================
+   STATES & RESULTS
+========================================= */
+.tf-correct { border-color: var(--green) !important; background: rgba(166, 227, 161, 0.08); }
+.tf-wrong { border-color: var(--red) !important; background: rgba(243, 139, 168, 0.08); }
+.should-be { border-color: var(--green) !important; color: var(--green) !important; box-shadow: 0 0 8px rgba(166, 227, 161, 0.5); }
+
+/* =========================================
+   ANKI ARTIFACT FIX
+========================================= */
+/* This removes the gray background highlight seen in Anki's code blocks */
+code, pre, .hljs {
+    background-color: transparent !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
+
+/* =========================================
+   CATPPUCCIN SYNTAX HIGHLIGHTING
+========================================= */
+pre code {
+    background: var(--crust) !important; 
+    padding: 15px; 
+    border-radius: 8px;
+    display: block; 
+    overflow-x: auto; 
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85em; 
+    border: 1px solid var(--border); 
+    margin: 12px 0; 
+    color: var(--text);
+    line-height: 1.5;
+}
+
+code { 
+    background: var(--surface); 
+    padding: 0.15em 0.4em; 
+    border-radius: 4px; 
+    color: #f5e0dc; /* Rosewater */
+    font-family: 'Fira Code', monospace; 
+}
+
+/* Highlight.js token mappings */
+.hljs-comment, .hljs-quote { color: #6c7086 !important; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag { color: var(--mauve) !important; }
+.hljs-string, .hljs-regexp { color: var(--green) !important; }
+.hljs-title, .hljs-section { color: var(--blue) !important; }
+.hljs-variable, .hljs-template-variable { color: var(--red) !important; }
+.hljs-number, .hljs-literal, .hljs-type { color: var(--peach) !important; }
+.hljs-built_in { color: var(--teal) !important; }
+.hljs-attr, .hljs-attribute { color: var(--peach) !important; }
+
+/* =========================================
+   MARKDOWN ELEMENTS
+========================================= */
+.inline-note {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--subtext);
+}
+
+.note-label {
+    font-weight: 800;
+    color: var(--blue);
+    margin-right: 6px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+}
+
+/* Markdown Header Styling */
+h1, h2, h3 { margin-top: 10px; margin-bottom: 5px; color: var(--text); }
+h1 { font-size: 1.4em; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+ul, ol { margin: 8px 0; padding-left: 20px; }
+blockquote {
+    border-left: 4px solid var(--blue);
+    margin: 10px 0;
+    padding: 5px 15px;
+    background: rgba(137, 180, 250, 0.05);
+    color: var(--subtext);
+    font-style: italic;
+}

@@ -1,0 +1,120 @@
+<div class="reveal-mode"></div>
+<div class="anki-app-wrapper">
+    <div class="main-card matching-container">
+        <div class="instruction-banner result-banner">RESULTS</div>
+        
+        <div class="result-legend">
+            <div class="legend-item state-correct">CORRECT</div>
+            <div class="legend-item state-wrong">WRONG</div>
+            <div class="legend-item state-missed">MISSED</div>
+        </div>
+
+        <div id="results-list" class="results-stack"></div>
+    </div>
+</div>
+
+<div id="raw-data-back" style="display:none;">
+    <div class="field-entry">{{field1}}</div>
+    <div class="field-entry">{{field2}}</div>
+    <div class="field-entry">{{field3}}</div>
+    <div class="field-entry">{{field4}}</div>
+    <div class="field-entry">{{field5}}</div>
+    <div class="field-entry">{{field6}}</div>
+</div>
+
+<script>
+    document.body.classList.add('reveal-mode');
+    setTimeout(revealResults, 50);
+
+    function cleanAnkiHTML(html) {
+        return html.replace(/<br\s*\/?>/gi, "\n")
+                   .replace(/<div[^>]*>/gi, "\n")
+                   .replace(/<\/div[^>]*>/g, "\n")
+                   .replace(/&nbsp;/gi, " ")
+                   .replace(/&gt;/gi, ">")
+                   .replace(/&lt;/gi, "<")
+                   .replace(/&amp;/gi, "&")
+                   .trim();
+    }
+
+    function processContent(ID, rawHTML, icon) {
+        let element = document.getElementById(ID);
+        if(!element) return;
+        let mdText = cleanAnkiHTML(rawHTML);
+        let md = new markdownit({ 
+            typographer: true, html: true,
+            highlight: function (str, lang) {
+                if (lang && typeof hljs !== 'undefined' && hljs.getLanguage(lang)) {
+                    try { return hljs.highlight(str, { language: lang }).value; } catch (__) {}
+                }
+                return '';
+            }
+        }).use(markdownItMark);
+        let iconHtml = icon ? `<span class="res-icon">${icon}</span>` : "";
+        element.innerHTML = iconHtml + md.render(mdText);
+        if (typeof renderMathInElement !== 'undefined') {
+            renderMathInElement(element, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}], throwOnError: false });
+        }
+    }
+
+    function revealResults() {
+        const rawFields = document.querySelectorAll('#raw-data-back .field-entry');
+        const container = document.getElementById('results-list');
+        let cardIdSeed = "";
+        let groupMap = {};
+        let itemLookup = {};
+
+        rawFields.forEach((field, i) => {
+            let content = field.innerHTML.trim();
+            if(!content) return;
+            let parts = content.split(/==\*\*==/);
+            const groupId = `group-${i}`;
+            cardIdSeed += parts[0];
+            groupMap[groupId] = { header: parts[0], correctIds: [] };
+            for(let j=1; j<parts.length; j++) {
+                const itemId = `item-${i}-${j}`;
+                itemLookup[itemId] = { raw: parts[j], origin: groupId };
+                groupMap[groupId].correctIds.push(itemId);
+            }
+        });
+
+        const cardId = btoa(unescape(encodeURIComponent(cardIdSeed))).substring(0, 16);
+        const userState = JSON.parse(sessionStorage.getItem('match_' + cardId) || '{}');
+
+        Object.keys(groupMap).forEach((groupId, i) => {
+            const group = groupMap[groupId];
+            const userPicks = userState[groupId] || [];
+            
+            const section = document.createElement('div');
+            section.className = 'result-group';
+            section.innerHTML = `<div class="group-header" id="rh-${i}"></div><div class="result-table"><div class="res-col"><h6>YOUR ATTEMPT</h6><div class="res-items attempt-box"></div></div><div class="res-col"><h6>ACTUAL ANSWER</h6><div class="res-items target-box"></div></div></div>`;
+            container.appendChild(section);
+
+            processContent(`rh-${i}`, group.header);
+            
+            const attemptBox = section.querySelector('.attempt-box');
+            const targetBox = section.querySelector('.target-box');
+
+            userPicks.forEach(id => {
+                const item = itemLookup[id];
+                const isCorrect = item.origin === groupId;
+                const chip = document.createElement('div');
+                chip.id = `att-${id}-${groupId}-${i}`;
+                chip.className = `match-chip result-chip ${isCorrect ? 'state-correct' : 'state-wrong'}`;
+                attemptBox.appendChild(chip);
+                processContent(chip.id, item.raw, isCorrect ? '✓' : '✕');
+            });
+
+            group.correctIds.forEach(id => {
+                const item = itemLookup[id];
+                const isFound = userPicks.includes(id);
+                const chip = document.createElement('div');
+                chip.id = `ans-${id}-${groupId}-${i}`;
+                chip.className = `match-chip result-chip ${isFound ? 'state-correct' : 'state-missed'}`;
+                targetBox.appendChild(chip);
+                processContent(chip.id, item.raw, isFound ? '✓' : '!');
+            });
+        });
+        sessionStorage.removeItem('match_' + cardId);
+    }
+</script>
