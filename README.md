@@ -18,27 +18,28 @@ Each folder in this repository contains the raw `front.html`, `back.html`, and `
 
 ### 📔 Basic
 Simple and effective. Perfect for structured notes and classical flashcards.
-![Basic Preview](https://github.com/user-attachments/assets/4846ede7-4e24-4475-8e77-cb86135d2296)
+<video src="https://github.com/user-attachments/assets/4846ede7-4e24-4475-8e77-cb86135d2296" autoplay loop muted playsinline width="100%"></video>
 
 ### 📝 Cloze
 The essential tool for fill-in-the-blanks learning.
-![Cloze Preview](https://github.com/user-attachments/assets/4825eafd-5c33-4251-9d08-bdbca776cf09)
+<video src="https://github.com/user-attachments/assets/4825eafd-5c33-4251-9d08-bdbca776cf09" autoplay loop muted playsinline width="100%"></video>
 
 ### 🔘 Multiple Choice (MCQ)
 Test your knowledge with interactive choice-based questions.
-![MCQ Preview](https://github.com/user-attachments/assets/5c293af7-d583-443b-8cc7-6e721d277a7d)
+<video src="https://github.com/user-attachments/assets/5c293af7-d583-443b-8cc7-6e721d277a7d" autoplay loop muted playsinline width="100%"></video>
 
 ### ⚖️ True / False
 Quickly verify facts with a specialized true/false interface.
-![True/False Preview](https://github.com/user-attachments/assets/2a978b46-0e3c-488b-8557-6b2695cff6a4)
+<video src="https://github.com/user-attachments/assets/2a978b46-0e3c-488b-8557-6b2695cff6a4" autoplay loop muted playsinline width="100%"></video>
 
 ### 🖇️ Matching
 Master relationships by connecting related pairs.
-![Matching Preview](https://github.com/user-attachments/assets/730dc3e4-ee0a-4f5c-8d70-1ea57a91294c)
+<video src="https://github.com/user-attachments/assets/730dc3e4-ee0a-4f5c-8d70-1ea57a91294c" autoplay loop muted playsinline width="100%"></video>
 
 ### 🔢 Ordering
 Learn sequences and chronological events by arranging items in order.
-![Ordering Preview](https://github.com/user-attachments/assets/d17cb356-0f52-4b2c-a9c8-28ccc512c9f6)
+<video src="https://github.com/user-attachments/assets/d17cb356-0f52-4b2c-a9c8-28ccc512c9f6" autoplay loop muted playsinline width="100%"></video>
+
 
 ---
 
