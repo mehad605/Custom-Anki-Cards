@@ -16,20 +16,29 @@ Enhance your Anki learning experience with beautiful, modern card templates feat
 
 Each folder in this repository contains the raw `front.html`, `back.html`, and `styling.css` for each type. Below are previews of them in action:
 
-### 📔 Basic & Cloze
-Simple and effective. Perfect for structured notes and fill-in-the-blanks.
-![Basic Preview](Assets/Basic.gif)
-![Cloze Preview](Assets/Cloze.gif)
+### 📔 Basic
+Simple and effective. Perfect for structured notes and classical flashcards.
+![Basic Preview](https://github.com/user-attachments/assets/4846ede7-4e24-4475-8e77-cb86135d2296)
 
-### 🔘 MCQ & True/False
-Test your knowledge with interactive choices.
-![MCQ Preview](Assets/mcq.gif)
-![True/False Preview](Assets/True-Flase.gif)
+### 📝 Cloze
+The essential tool for fill-in-the-blanks learning.
+![Cloze Preview](https://github.com/user-attachments/assets/4825eafd-5c33-4251-9d08-bdbca776cf09)
 
-### 🖇️ Matching & Ordering
-Master relationships and sequences.
-![Matching Preview](Assets/matching.gif)
-![Ordering Preview](Assets/order.gif)
+### 🔘 Multiple Choice (MCQ)
+Test your knowledge with interactive choice-based questions.
+![MCQ Preview](https://github.com/user-attachments/assets/5c293af7-d583-443b-8cc7-6e721d277a7d)
+
+### ⚖️ True / False
+Quickly verify facts with a specialized true/false interface.
+![True/False Preview](https://github.com/user-attachments/assets/2a978b46-0e3c-488b-8557-6b2695cff6a4)
+
+### 🖇️ Matching
+Master relationships by connecting related pairs.
+![Matching Preview](https://github.com/user-attachments/assets/730dc3e4-ee0a-4f5c-8d70-1ea57a91294c)
+
+### 🔢 Ordering
+Learn sequences and chronological events by arranging items in order.
+![Ordering Preview](https://github.com/user-attachments/assets/d17cb356-0f52-4b2c-a9c8-28ccc512c9f6)
 
 ---
 
@@ -37,7 +46,7 @@ Master relationships and sequences.
 
 The easiest way to get these into Anki is using the pre-packaged `.apkg` files.
 
-1.  **Download**: Head over to the [GitHub Releases](https://github.com/REPLACE_WITH_YOUR_PATH/releases) section.
+1.  **Download**: Head over to the [GitHub Releases](https://github.com/mehad605/Custom-Anki-Cards/releases) section.
 2.  **Choose your pack**:
     *   Download `ALL_IN_ONE.apkg` to get every card type at once.
     *   Alternatively, download the specific `.apkg` for the card type you want.
@@ -54,3 +63,4 @@ The easiest way to get these into Anki is using the pre-packaged `.apkg` files.
 ---
 
 Enjoy your studies! 🧠✨
+
