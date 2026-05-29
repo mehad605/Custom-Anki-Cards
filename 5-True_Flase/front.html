@@ -1,0 +1,169 @@
+<div class="anki-app-wrapper">
+    <div class="main-card">
+        <div class="tf-header">
+            <span class="txt-green">TRUE</span> <span class="sep">/</span>
+            <span class="txt-red">FALSE</span>
+        </div>
+        <div id="tf-list" class="options-stack"></div>
+    </div>
+</div>
+
+<div id="data-store" style="display: none">
+    <div class="tf-data" data-idx="1" data-note="{{item1_note}}">{{item1}}</div>
+    <div class="tf-data" data-idx="2" data-note="{{item2_note}}">{{item2}}</div>
+    <div class="tf-data" data-idx="3" data-note="{{item3_note}}">{{item3}}</div>
+    <div class="tf-data" data-idx="4" data-note="{{item4_note}}">{{item4}}</div>
+    <div class="tf-data" data-idx="5" data-note="{{item5_note}}">{{item5}}</div>
+</div>
+
+<script>
+    var getResources = [
+        getCSS(
+            "_katex.css",
+            "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css",
+        ),
+        getCSS(
+            "_highlight.css",
+            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/default.min.css",
+        ),
+        getScript(
+            "_highlight.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/highlight.min.js",
+        ),
+        getScript(
+            "_katex.min.js",
+            "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js",
+        ),
+        getScript(
+            "_auto-render.js",
+            "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/auto-render-cdn.js",
+        ),
+        getScript(
+            "_markdown-it.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.0.4/markdown-it.min.js",
+        ),
+        getScript(
+            "_markdown-it-mark.js",
+            "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js",
+        ),
+    ];
+
+    Promise.all(getResources)
+        .then(() =>
+            getScript(
+                "_mhchem.js",
+                "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js",
+            ),
+        )
+        .then(initTFItems);
+
+    function getScript(path, altURL) {
+        return new Promise((resolve) => {
+            let s = document.createElement("script");
+            s.onload = resolve;
+            s.onerror = () => {
+                let s2 = document.createElement("script");
+                s2.src = altURL;
+                s2.onload = resolve;
+                document.head.appendChild(s2);
+            };
+            s.src = path;
+            document.head.appendChild(s);
+        });
+    }
+    function getCSS(path, altURL) {
+        return new Promise((resolve) => {
+            let c = document.createElement("link");
+            c.rel = "stylesheet";
+            c.href = path;
+            c.onerror = () => {
+                let c2 = document.createElement("link");
+                c2.rel = "stylesheet";
+                c2.href = altURL;
+                document.head.appendChild(c2);
+            };
+            document.head.appendChild(c);
+            resolve();
+        });
+    }
+
+    function cleanAnkiHTML(html) {
+        return html
+            .replace(/<br\s*[\/]?>/gi, "\n")
+            .replace(/<div[^>]*>/gi, "\n")
+            .replace(/<\/div[^>]*>/g, "\n")
+            .replace(/&nbsp;/gi, " ")
+            .replace(/&gt;/gi, ">")
+            .replace(/&lt;/gi, "<")
+            .replace(/&amp;/gi, "&")
+            .trim();
+    }
+
+    function markdown(element) {
+        if (!element || typeof markdownit === "undefined") return;
+        const md = new markdownit({
+            html: true,
+            typographer: true,
+            highlight: (str, lang) => {
+                if (
+                    lang &&
+                    typeof hljs !== "undefined" &&
+                    hljs.getLanguage(lang)
+                ) {
+                    try {
+                        return hljs.highlight(str, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return "";
+            },
+        }).use(markdownItMark);
+
+        element.innerHTML = md.render(cleanAnkiHTML(element.innerHTML));
+        if (typeof renderMathInElement !== "undefined") {
+            renderMathInElement(element, {
+                delimiters: [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false },
+                ],
+                throwOnError: false,
+            });
+        }
+    }
+
+    function initTFItems() {
+        const container = document.getElementById("tf-list");
+        const rawItems = Array.from(document.querySelectorAll(".tf-data"));
+        rawItems.forEach((el) => {
+            let rawText = cleanAnkiHTML(el.innerHTML);
+            const match = rawText.match(/^\s*==([TF])==\s*([\s\S]*)/i);
+            if (match) {
+                const row = document.createElement("div");
+                row.className = "tf-row";
+                row.dataset.idx = el.dataset.idx;
+                row.innerHTML = `<div class="tf-content">${match[2]}</div><div class="tf-controls"><div class="tf-btn btn-check" onclick="toggleSelection(this.parentElement.parentElement, 'T')"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="tf-btn btn-cross" onclick="toggleSelection(this.parentElement.parentElement, 'F')"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div></div>`;
+                container.appendChild(row);
+                markdown(row.querySelector(".tf-content"));
+
+                const saved = sessionStorage.getItem(
+                    `tf_pick_${el.dataset.idx}`,
+                );
+                if (saved)
+                    row.querySelector(
+                        saved === "T" ? ".btn-check" : ".btn-cross",
+                    ).classList.add("selected");
+            }
+        });
+        if (typeof revealResults === "function") setTimeout(revealResults, 50);
+    }
+
+    function toggleSelection(row, choice) {
+        if (document.body.classList.contains("reveal-mode")) return;
+        row.querySelectorAll(".tf-btn").forEach((b) =>
+            b.classList.remove("selected"),
+        );
+        sessionStorage.setItem(`tf_pick_${row.dataset.idx}`, choice);
+        row.querySelector(
+            choice === "T" ? ".btn-check" : ".btn-cross",
+        ).classList.add("selected");
+    }
+</script>

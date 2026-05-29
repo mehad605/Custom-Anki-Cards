@@ -12,18 +12,32 @@
     --border: #45475a;
 }
 
-body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
-.anki-app-wrapper { max-width: 850px; margin: auto; }
-
-.main-card { 
-    background: var(--card-bg); 
-    border: 1px solid var(--border); 
-    border-radius: 12px; 
-    padding: 25px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", sans-serif;
+    padding: 20px;
+    margin: 0;
+}
+.anki-app-wrapper {
+    max-width: 850px;
+    margin: auto;
 }
 
-.separator { height: 1px; background: var(--border); margin: 25px 0; opacity: 0.3; }
+.main-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.separator {
+    height: 1px;
+    background: var(--border);
+    margin: 25px 0;
+    opacity: 0.3;
+}
 
 /* --- CLOZE STYLE --- */
 .cloze {
@@ -34,7 +48,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 }
 
 /* --- FIXING GRAY BOX ARTIFACTS --- */
-code, pre, .hljs {
+code,
+pre,
+.hljs {
     background-color: transparent !important;
     -webkit-user-select: text !important;
 }
@@ -48,16 +64,27 @@ pre {
 }
 
 code {
-    font-family: 'Fira Code', monospace;
+    font-family: "Fira Code", monospace;
     background: var(--surface);
-    color: #f9e2af; 
+    color: #f9e2af;
     padding: 2px 6px;
     border-radius: 4px;
 }
 
 /* --- SYNTAX HIGHLIGHTING --- */
-.hljs-comment { color: #6c7086; font-style: italic; }
-.hljs-keyword { color: var(--mauve); }
-.hljs-string { color: var(--green); }
-.hljs-title { color: var(--blue); }
-.hljs-number { color: #fab387; }
+.hljs-comment {
+    color: #6c7086;
+    font-style: italic;
+}
+.hljs-keyword {
+    color: var(--mauve);
+}
+.hljs-string {
+    color: var(--green);
+}
+.hljs-title {
+    color: var(--blue);
+}
+.hljs-number {
+    color: #fab387;
+}
