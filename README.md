@@ -45,17 +45,29 @@ Learn sequences and chronological events by arranging items in order.
 
 ## 🛠️ How to Use
 
-The easiest way to get these into Anki is using the pre-packaged `.apkg` files.
+The quickest way to get these templates into Anki is by using the pre-packaged `.zip` file from our Releases. 
 
-1.  **Download**: Head over to the [GitHub Releases](https://github.com/mehad605/Custom-Anki-Cards/releases) section.
-2.  **Choose your pack**:
-    *   Download `ALL_IN_ONE.apkg` to get every card type at once.
-    *   Alternatively, download the specific `.apkg` for the card type you want.
-3.  **Import**:
-    *   Open Anki.
-    *   Go to `File` -> `Import`.
-    *   Select the `.apkg` file you downloaded.
-4.  **Done!**: The card types will now be available when you create a new card.
+### Option 1: Automatic Import (Recommended)
+
+1. **Download:** Head over to the **Releases** section and download `All.zip`.
+2. **Extract:** Locate the downloaded `.zip` file on your computer and extract (unzip) it to reveal the `All.apkg` file.
+3. **Import:** Open Anki, go to **File** -> **Import**, and select the `All.apkg` file.
+4. **Done! 🎉** The new card layouts are now available in your card type list whenever you create a new flashcard.
+
+---
+
+### Option 2: Manual Installation (For Customization)
+
+If you want to tweak the code or only want a specific card type, you can manually build the templates using the raw source files. Each folder in this repository contains the raw `front.html`, `back.html`, and `styling.css` files.
+
+1. Open **Anki** and click on **Tools** -> **Manage Note Types**.
+2. Click **Add** -> **Add: Basic**, name your new card type, and click **OK**.
+3. Select your new note type from the list and click the **Cards...** button on the right.
+4. Open the folder of the card type you want in this GitHub repo:
+   * Copy the contents of `front.html` and paste it into the **Front Template** box in Anki.
+   * Copy the contents of `back.html` and paste it into the **Back Template** box in Anki.
+   * Copy the contents of `styling.css` and paste it into the **Styling** box in Anki.
+5. Click **Save** to apply the changes.
 
 > [!TIP]
 > **Not sure how to format the fields?**
