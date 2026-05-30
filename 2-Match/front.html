@@ -53,12 +53,12 @@
     ];
 
     Promise.all(getResources)
-        .then(() => {
-            return getScript(
+        .then(() =>
+            getScript(
                 "_mhchem.js",
                 "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js",
-            );
-        })
+            ),
+        )
         .then(initMatching)
         .catch(initMatching);
 
@@ -77,6 +77,7 @@
             document.head.appendChild(script);
         });
     }
+
     function getCSS(path, altURL) {
         return new Promise((resolve, reject) => {
             var css = document.createElement("link");
@@ -130,7 +131,10 @@
             },
         }).use(markdownItMark);
         element.innerHTML = md.render(mdText);
-        if (typeof renderMathInElement !== "undefined") {
+        if (
+            typeof renderMathInElement !== "undefined" &&
+            element.textContent.includes("$")
+        ) {
             renderMathInElement(element, {
                 delimiters: [
                     { left: "$$", right: "$$", display: true },
@@ -148,6 +152,11 @@
         const rawFields = document.querySelectorAll(".field-entry");
         const leftCol = document.getElementById("drop-zones");
         const rightCol = document.getElementById("item-pool");
+        if (!leftCol || !rightCol) return;
+
+        leftCol.innerHTML = "";
+        rightCol.innerHTML = "";
+
         let allItems = [];
         let cardIdSeed = "";
 
@@ -160,7 +169,13 @@
 
             const groupWrapper = document.createElement("div");
             groupWrapper.className = "group-wrapper";
-            groupWrapper.innerHTML = `<div class="group-header" id="h-${i}"></div><div class="drop-zone" data-group-id="${groupId}"></div>`;
+            groupWrapper.innerHTML = `
+                <div class="group-header" id="h-${i}"></div>
+                <div class="drop-zone" data-group-id="${groupId}">
+                    <div class="zone-target top-target"><span>TAP HERE</span></div>
+                    <div class="zone-chips-container"></div>
+                    <div class="zone-target bottom-target"><span>TAP HERE</span></div>
+                </div>`;
             leftCol.appendChild(groupWrapper);
 
             processContent(`h-${i}`, parts[0]);
@@ -182,6 +197,7 @@
             16,
         );
         allItems.sort(() => Math.random() - 0.5);
+
         allItems.forEach((item) => {
             const chip = document.createElement("div");
             chip.className = "match-chip";
@@ -210,7 +226,10 @@
 
     function handleZoneClick(zone) {
         if (!selectedChip) return;
-        zone.appendChild(selectedChip);
+        const container = zone.querySelector(".zone-chips-container");
+        if (container) {
+            container.appendChild(selectedChip);
+        }
         selectedChip.classList.remove("selected");
         selectedChip = null;
         document.body.classList.remove("item-active");
@@ -220,7 +239,12 @@
     function saveState() {
         const state = {};
         document.querySelectorAll(".drop-zone").forEach((z) => {
-            state[z.dataset.groupId] = Array.from(z.children).map((c) => c.id);
+            const container = z.querySelector(".zone-chips-container");
+            if (container) {
+                state[z.dataset.groupId] = Array.from(container.children).map(
+                    (c) => c.id,
+                );
+            }
         });
         sessionStorage.setItem("match_" + cardUniqueId, JSON.stringify(state));
     }

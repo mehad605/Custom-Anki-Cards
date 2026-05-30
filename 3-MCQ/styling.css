@@ -43,8 +43,18 @@ body {
         "Segoe UI",
         Roboto,
         sans-serif;
-    padding: 10px;
+    padding: 12px;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.anki-app-wrapper {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .main-card {
@@ -53,29 +63,32 @@ body {
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    max-width: 640px;
-    margin: auto;
+    width: 100%;
+    box-sizing: border-box;
     position: relative;
 }
 
 .answer-card-spaced {
     margin-top: 20px;
-    padding: 20px;
     border-color: var(--ctp-blue);
 }
 
 .question-container {
-    font-size: 20px;
-    font-weight: 800;
+    font-size: 19px;
+    font-weight: 700;
     margin-bottom: 20px;
-    line-height: 1.4;
+    line-height: 1.5;
     color: var(--ctp-text);
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .options-stack {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    width: 100%;
 }
 
 /* --- ROW LAYOUT --- */
@@ -86,12 +99,14 @@ body {
     border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
-    transition: all 0.1s;
+    transition: border-color 0.1s ease;
     min-height: 60px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .letter-box {
-    width: 40px;
+    width: 44px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -105,10 +120,12 @@ body {
 
 .content-box {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 10px 12px;
+    padding: 12px 14px;
+    text-align: left;
 }
 
 .opt-text {
@@ -117,15 +134,26 @@ body {
     color: var(--ctp-text);
 }
 
+/* Force layout cleanups on elements inside parsed markdown */
+.question-container p,
+.opt-text p {
+    margin: 0 0 8px 0;
+    text-align: left;
+}
+.question-container p:last-child,
+.opt-text p:last-child {
+    margin-bottom: 0;
+}
+
 .status-box {
-    width: 24px;
+    width: 26px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 9px;
     font-weight: 900;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .v-text {
@@ -137,7 +165,7 @@ body {
 /* Interaction & States */
 .opt-row.selected {
     border-color: var(--primary);
-    background: rgba(203, 166, 247, 0.1);
+    background: rgba(203, 166, 247, 0.08);
 }
 .opt-row.selected .letter-box {
     color: var(--primary);
@@ -145,7 +173,7 @@ body {
 
 .state-correct {
     border-color: var(--success) !important;
-    background: rgba(166, 227, 161, 0.05) !important;
+    background: rgba(166, 227, 161, 0.06) !important;
 }
 .state-correct .letter-box {
     color: var(--success);
@@ -157,7 +185,7 @@ body {
 
 .state-wrong {
     border-color: var(--danger) !important;
-    background: rgba(243, 139, 168, 0.05) !important;
+    background: rgba(243, 139, 168, 0.06) !important;
 }
 .state-wrong .letter-box {
     color: var(--danger);
@@ -169,7 +197,7 @@ body {
 
 .state-missed {
     border-color: var(--warning) !important;
-    background: rgba(250, 179, 135, 0.05) !important;
+    background: rgba(250, 179, 135, 0.06) !important;
 }
 .state-missed .letter-box {
     color: var(--warning);
@@ -187,14 +215,14 @@ body {
 .answer-row .letter-box {
     color: var(--ctp-blue);
     font-size: 12px;
-    letter-spacing: 1px;
 }
 
 .summary-grid {
     display: flex;
-    justify-content: space-around; /* Restores spacing */
+    justify-content: space-around;
     align-items: center;
     padding-bottom: 5px;
+    width: 100%;
 }
 
 .summary-col {
@@ -215,7 +243,22 @@ body {
     letter-spacing: 2px;
 }
 
-/* Dynamic result text colors */
+.inline-note {
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid var(--ctp-peach);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-top: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.note-label {
+    font-weight: 800;
+    color: var(--ctp-peach);
+    margin-right: 4px;
+}
+
 .txt-green {
     color: var(--ctp-green) !important;
 }
@@ -223,27 +266,53 @@ body {
     color: var(--ctp-red) !important;
 }
 
-/* --- SYNTAX HIGHLIGHTING FIXES --- */
+/* --- CODEBLOCK & INLINE CODE FIXES FOR MOBILE --- */
 code,
 pre,
 .hljs {
-    background-color: transparent !important;
     -webkit-user-select: text !important;
+    user-select: text !important;
+}
+
+pre {
+    margin: 8px 0;
+    white-space: pre-wrap; /* CHANGED: Forces text wrapping for long code lines on mobile */
+    word-break: break-all; /* ADDED: Extra insurance for long strings on narrow screens */
+    overflow-x: auto;
+    width: 100%;
+    background: var(--ctp-crust) !important;
+    border: 1px solid var(--ctp-surface0);
+    border-radius: 6px;
+    box-sizing: border-box; /* ADDED: Ensures padding doesn't push width past 100% */
 }
 
 pre code {
     display: block;
-    padding: 0.8em;
-    overflow-x: auto;
-    border-radius: 6px;
-    background: var(--ctp-crust) !important;
+    padding: 10px;
+    background: transparent !important;
     color: var(--ctp-text);
     font-family: "Fira Code", monospace;
-    font-size: 0.85em;
-    margin: 6px 0;
-    border: 1px solid var(--ctp-surface0);
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: pre-wrap; /* CHANGED: Keeps code wrapping consistent inside the code block */
+}
+code {
+    background: var(--ctp-surface0);
+    color: var(--ctp-peach);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: "Fira Code", monospace;
+    font-size: 12px;
 }
 
+.footer-hint {
+    margin-top: 15px;
+    font-size: 11px;
+    color: var(--ctp-overlay0);
+    text-align: center;
+}
+
+/* Syntax Color Fallbacks */
 .hljs-comment {
     color: var(--ctp-overlay0) !important;
     font-style: italic;

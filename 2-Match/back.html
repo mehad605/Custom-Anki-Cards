@@ -24,9 +24,20 @@
 
 <script>
     document.body.classList.add("reveal-mode");
-    setTimeout(revealResults, 50);
+
+    if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+    ) {
+        setTimeout(safeRevealResults, 100);
+    } else {
+        document.addEventListener("DOMContentLoaded", () =>
+            setTimeout(safeRevealResults, 100),
+        );
+    }
 
     function cleanAnkiHTML(html) {
+        if (!html) return "";
         return html
             .replace(/<br\s*\/?>/gi, "\n")
             .replace(/<div[^>]*>/gi, "\n")
@@ -38,29 +49,49 @@
             .trim();
     }
 
-    function processContent(ID, rawHTML, icon) {
-        let element = document.getElementById(ID);
+    function processBackContent(elementId, rawHTML, icon) {
+        let element = document.getElementById(elementId);
         if (!element) return;
+
         let mdText = cleanAnkiHTML(rawHTML);
-        let md = new markdownit({
-            typographer: true,
-            html: true,
-            highlight: function (str, lang) {
-                if (
-                    lang &&
-                    typeof hljs !== "undefined" &&
-                    hljs.getLanguage(lang)
-                ) {
-                    try {
-                        return hljs.highlight(str, { language: lang }).value;
-                    } catch (__) {}
-                }
-                return "";
-            },
-        }).use(markdownItMark);
-        let iconHtml = icon ? `<span class="res-icon">${icon}</span>` : "";
-        element.innerHTML = iconHtml + md.render(mdText);
-        if (typeof renderMathInElement !== "undefined") {
+
+        if (typeof markdownit !== "undefined") {
+            let md = new markdownit({
+                typographer: true,
+                html: true,
+                highlight: function (str, lang) {
+                    if (
+                        lang &&
+                        typeof hljs !== "undefined" &&
+                        hljs.getLanguage(lang)
+                    ) {
+                        try {
+                            return hljs.highlight(str, { language: lang })
+                                .value;
+                        } catch (__) {}
+                    }
+                    return "";
+                },
+            });
+            if (typeof markdownItMark !== "undefined") {
+                md.use(markdownItMark);
+            }
+            element.innerHTML = md.render(mdText);
+        } else {
+            element.innerText = mdText;
+        }
+
+        if (icon) {
+            const iconSpan = document.createElement("span");
+            iconSpan.className = "res-icon";
+            iconSpan.innerText = icon;
+            element.insertBefore(iconSpan, element.firstChild);
+        }
+
+        if (
+            typeof renderMathInElement !== "undefined" &&
+            element.textContent.includes("$")
+        ) {
             renderMathInElement(element, {
                 delimiters: [
                     { left: "$$", right: "$$", display: true },
@@ -71,36 +102,52 @@
         }
     }
 
-    function revealResults() {
+    function safeRevealResults() {
         const rawFields = document.querySelectorAll(
             "#raw-data-back .field-entry",
         );
         const container = document.getElementById("results-list");
+        if (!container) return;
+        container.innerHTML = "";
+
         let cardIdSeed = "";
         let groupMap = {};
         let itemLookup = {};
 
         rawFields.forEach((field, i) => {
             let content = field.innerHTML.trim();
-            if (!content) return;
+            if (!content || content.includes("{{field")) return;
+
             let parts = content.split(/==\*\*==/);
+            if (parts.length === 0 || !parts[0].trim()) return;
+
             const groupId = `group-${i}`;
             cardIdSeed += parts[0];
             groupMap[groupId] = { header: parts[0], correctIds: [] };
+
             for (let j = 1; j < parts.length; j++) {
+                if (!parts[j].trim()) continue;
                 const itemId = `item-${i}-${j}`;
                 itemLookup[itemId] = { raw: parts[j], origin: groupId };
                 groupMap[groupId].correctIds.push(itemId);
             }
         });
 
+        if (cardIdSeed === "") return;
+
         const cardId = btoa(unescape(encodeURIComponent(cardIdSeed))).substring(
             0,
             16,
         );
-        const userState = JSON.parse(
-            sessionStorage.getItem("match_" + cardId) || "{}",
-        );
+        let userState = {};
+
+        try {
+            userState = JSON.parse(
+                sessionStorage.getItem("match_" + cardId) || "{}",
+            );
+        } catch (e) {
+            userState = {};
+        }
 
         Object.keys(groupMap).forEach((groupId, i) => {
             const group = groupMap[groupId];
@@ -108,34 +155,48 @@
 
             const section = document.createElement("div");
             section.className = "result-group";
-            section.innerHTML = `<div class="group-header" id="rh-${i}"></div><div class="result-table"><div class="res-col"><h6>YOUR ATTEMPT</h6><div class="res-items attempt-box"></div></div><div class="res-col"><h6>ACTUAL ANSWER</h6><div class="res-items target-box"></div></div></div>`;
+            section.innerHTML = `
+                <div class="group-header" id="rh-${i}"></div>
+                <div class="result-table">
+                    <div class="res-col">
+                        <h6>YOUR ATTEMPT</h6>
+                        <div class="res-items attempt-box"></div>
+                    </div>
+                    <div class="res-col">
+                        <h6>ACTUAL ANSWER</h6>
+                        <div class="res-items target-box"></div>
+                    </div>
+                </div>`;
             container.appendChild(section);
 
-            processContent(`rh-${i}`, group.header);
+            processBackContent(`rh-${i}`, group.header);
 
             const attemptBox = section.querySelector(".attempt-box");
             const targetBox = section.querySelector(".target-box");
 
             userPicks.forEach((id) => {
                 const item = itemLookup[id];
+                if (!item) return;
                 const isCorrect = item.origin === groupId;
                 const chip = document.createElement("div");
                 chip.id = `att-${id}-${groupId}-${i}`;
                 chip.className = `match-chip result-chip ${isCorrect ? "state-correct" : "state-wrong"}`;
                 attemptBox.appendChild(chip);
-                processContent(chip.id, item.raw, isCorrect ? "✓" : "✕");
+                processBackContent(chip.id, item.raw, isCorrect ? "✓" : "✕");
             });
 
             group.correctIds.forEach((id) => {
                 const item = itemLookup[id];
+                if (!item) return;
                 const isFound = userPicks.includes(id);
                 const chip = document.createElement("div");
                 chip.id = `ans-${id}-${groupId}-${i}`;
                 chip.className = `match-chip result-chip ${isFound ? "state-correct" : "state-missed"}`;
                 targetBox.appendChild(chip);
-                processContent(chip.id, item.raw, isFound ? "✓" : "!");
+                processBackContent(chip.id, item.raw, isFound ? "✓" : "!");
             });
         });
+
         sessionStorage.removeItem("match_" + cardId);
     }
 </script>

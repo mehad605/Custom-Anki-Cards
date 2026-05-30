@@ -45,6 +45,7 @@ body {
     border-radius: 12px;
     padding: 24px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    will-change: transform;
 }
 
 .tf-header {
@@ -78,7 +79,7 @@ body {
     margin-bottom: 12px;
     min-height: 60px;
     overflow: hidden;
-    transition: all 0.2s;
+    transition: border-color 0.2s, background-color 0.2s;
 }
 
 .tf-content {
@@ -107,10 +108,11 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
     border: 3px solid #6c7086;
     color: #6c7086;
     background: transparent;
+    will-change: transform;
 }
 
 .tf-btn.selected,

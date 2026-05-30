@@ -118,7 +118,7 @@
             },
         }).use(markdownItMark);
         target.innerHTML = md.render(rawText);
-        if (typeof renderMathInElement !== "undefined") {
+        if (typeof renderMathInElement !== "undefined" && target.textContent.includes('$')) {
             renderMathInElement(target, {
                 delimiters: [
                     { left: "$$", right: "$$", display: true },
@@ -163,9 +163,7 @@
 
         zone.onclick = (e) => {
             if (selectedChip) {
-                const rect = zone.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                if (x < rect.width / 2) zone.prepend(selectedChip);
+                if (e.offsetX < zone.clientWidth / 2) zone.prepend(selectedChip);
                 else zone.appendChild(selectedChip);
                 updateUIState();
             }

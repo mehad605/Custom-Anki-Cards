@@ -122,7 +122,7 @@
             (match, index) => clozes[parseInt(index)],
         );
 
-        if (typeof renderMathInElement !== "undefined") {
+        if (typeof renderMathInElement !== "undefined" && target.textContent.includes('$')) {
             renderMathInElement(target, {
                 delimiters: [
                     { left: "$$", right: "$$", display: true },

@@ -102,8 +102,7 @@
         });
     }
 
-    function renderMath(ID) {
-        let element = document.getElementById(ID);
+    function renderMath(element) {
         if (!element) return;
         let text = element.innerHTML;
         text = replaceInString(text);
@@ -119,8 +118,7 @@
         }
     }
 
-    function markdown(ID) {
-        let element = document.getElementById(ID);
+    function markdown(element) {
         if (!element || typeof markdownit === "undefined") return;
         let md = new markdownit({
             typographer: true,
@@ -160,11 +158,22 @@
         return str.replace(/&amp;/gi, "&");
     }
 
+    function processContent(sourceHtml) {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = sourceHtml;
+        renderMath(tempDiv);
+        markdown(tempDiv);
+        return tempDiv.innerHTML;
+    }
+
     function initCard() {
-        renderMath("question-container");
-        markdown("question-container");
+        const qContainer = document.getElementById("question-container");
+        if (qContainer) {
+            qContainer.innerHTML = processContent(qContainer.innerHTML);
+        }
 
         const list = document.getElementById("options-list");
+        if (!list) return;
         list.innerHTML = "";
 
         const letters = ["A", "B", "C", "D", "E", "F"];
@@ -172,25 +181,24 @@
             (l) => document.getElementById("opt-" + l).innerHTML.trim() !== "",
         );
 
-        const qText = document.getElementById("question-container").innerText;
+        const qText = qContainer ? qContainer.innerText : "";
         const ansText = document.getElementById("ans-val").innerText;
         const cardID = qText + "::" + ansText;
 
         let shuffled;
         if (window.ankiCardID === cardID && window.ankiShuffledOrder) {
-            shuffled = availableLetters.sort((a, b) => {
-                return (
+            shuffled = availableLetters.sort(
+                (a, b) =>
                     window.ankiShuffledOrder.indexOf(a) -
-                    window.ankiShuffledOrder.indexOf(b)
-                );
-            });
+                    window.ankiShuffledOrder.indexOf(b),
+            );
         } else {
             shuffled = availableLetters.sort(() => Math.random() - 0.5);
             window.ankiCardID = cardID;
             window.ankiShuffledOrder = [...shuffled];
         }
 
-        shuffled.forEach((l, i) => {
+        shuffled.forEach((l) => {
             const row = document.createElement("div");
             row.className = "opt-row";
             row.dataset.letter = l;
@@ -202,19 +210,11 @@
             const contentBox = document.createElement("div");
             contentBox.className = "content-box";
 
-            const tempDiv = document.createElement("div");
-            tempDiv.id = "temp-opt-" + l;
-            tempDiv.innerHTML = document.getElementById("opt-" + l).innerHTML;
-            tempDiv.style.display = "none";
-            document.body.appendChild(tempDiv);
-            renderMath("temp-opt-" + l);
-            markdown("temp-opt-" + l);
-
             const textBox = document.createElement("div");
             textBox.className = "opt-text";
-            textBox.innerHTML = tempDiv.innerHTML;
-            document.body.removeChild(tempDiv);
-
+            textBox.innerHTML = processContent(
+                document.getElementById("opt-" + l).innerHTML,
+            );
             contentBox.appendChild(textBox);
 
             const statusBox = document.createElement("div");

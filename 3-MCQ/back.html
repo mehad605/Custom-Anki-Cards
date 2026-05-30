@@ -45,6 +45,14 @@
         ansContainer.style.display = "block";
     }
 
+    function processContentDirect(sourceHtml) {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = sourceHtml;
+        if (typeof renderMath === "function") renderMath(tempDiv);
+        if (typeof markdown === "function") markdown(tempDiv);
+        return tempDiv.innerHTML;
+    }
+
     function revealAnswers() {
         const correctAns = document
             .getElementById("ans-val")
@@ -104,13 +112,12 @@
                 const n = document.createElement("div");
                 n.className = "inline-note";
                 n.id = "inline-note-" + l;
-                n.innerHTML = `<span class="note-label">NOTE:</span> <span id="note-md-${l}">${noteContent}</span>`;
+                n.innerHTML = `<span class="note-label">NOTE:</span> <span id="note-md-${l}"></span>`;
                 contentBox.appendChild(n);
 
-                const noteInner = document.getElementById(`note-md-${l}`);
-                if (noteInner) {
-                    renderMath(`note-md-${l}`);
-                    markdown(`note-md-${l}`);
+                const targetSpan = document.getElementById(`note-md-${l}`);
+                if (targetSpan) {
+                    targetSpan.innerHTML = processContentDirect(noteContent);
                 }
             }
         });
@@ -124,6 +131,7 @@
                   )
                   .join(" ")
             : '<span class="txt-orange">-</span>';
+
         const targetHtml = correctAns
             .sort()
             .map((c) => `<span class="txt-green">${c}</span>`)
@@ -133,11 +141,16 @@
         document.getElementById("actual-answers").innerHTML = targetHtml;
 
         const mainNoteText = document.getElementById("main-note-text");
-        if (mainNoteText && mainNoteText.innerHTML.trim() !== "") {
-            document.getElementById("main-note-wrapper").style.display =
-                "block";
-            renderMath("main-note-text");
-            markdown("main-note-text");
+        const mainNoteWrapper = document.getElementById("main-note-wrapper");
+        if (
+            mainNoteText &&
+            mainNoteWrapper &&
+            mainNoteText.innerHTML.trim() !== ""
+        ) {
+            mainNoteText.innerHTML = processContentDirect(
+                mainNoteText.innerHTML,
+            );
+            mainNoteWrapper.style.display = "block";
         }
     }
 </script>

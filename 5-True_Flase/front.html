@@ -119,7 +119,7 @@
         }).use(markdownItMark);
 
         element.innerHTML = md.render(cleanAnkiHTML(element.innerHTML));
-        if (typeof renderMathInElement !== "undefined") {
+        if (typeof renderMathInElement !== "undefined" && element.textContent.includes('$')) {
             renderMathInElement(element, {
                 delimiters: [
                     { left: "$$", right: "$$", display: true },
@@ -140,7 +140,7 @@
                 const row = document.createElement("div");
                 row.className = "tf-row";
                 row.dataset.idx = el.dataset.idx;
-                row.innerHTML = `<div class="tf-content">${match[2]}</div><div class="tf-controls"><div class="tf-btn btn-check" onclick="toggleSelection(this.parentElement.parentElement, 'T')"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="tf-btn btn-cross" onclick="toggleSelection(this.parentElement.parentElement, 'F')"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div></div>`;
+                row.innerHTML = `<div class="tf-content">${match[2]}</div><div class="tf-controls"><div class="tf-btn btn-check"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="tf-btn btn-cross"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div></div>`;
                 container.appendChild(row);
                 markdown(row.querySelector(".tf-content"));
 
@@ -153,6 +153,18 @@
                     ).classList.add("selected");
             }
         });
+        container.onclick = (e) => {
+            if (document.body.classList.contains("reveal-mode")) return;
+            const btn = e.target.closest(".tf-btn");
+            if (!btn) return;
+            const row = btn.closest(".tf-row");
+            const choice = btn.classList.contains("btn-check") ? "T" : "F";
+            row.querySelectorAll(".tf-btn").forEach((b) =>
+                b.classList.remove("selected"),
+            );
+            sessionStorage.setItem(`tf_pick_${row.dataset.idx}`, choice);
+            btn.classList.add("selected");
+        };
         if (typeof revealResults === "function") setTimeout(revealResults, 50);
     }
 
