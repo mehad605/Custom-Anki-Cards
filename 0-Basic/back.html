@@ -2,17 +2,20 @@
     <div class="main-card content-container" id="front-outer">
         <div id="front-content"></div>
     </div>
-
     <div class="separator"></div>
-
     <div class="main-card content-container back-container" id="back-outer">
         <div id="back-content"></div>
     </div>
+    {{#Note}}
+    <div class="separator"></div>
+    <div class="main-card content-container note-container" id="note-outer">
+        <div id="note-content"></div>
+    </div>
+    {{/Note}}
 </div>
-
 <div id="raw-front" style="display: none">{{Front}}</div>
 <div id="raw-back" style="display: none">{{Back}}</div>
-
+<div id="raw-note" style="display: none">{{Note}}</div>
 <script>
     var getResources = [
         getCSS(
@@ -44,7 +47,6 @@
             "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js",
         ),
     ];
-
     function getScript(path, altURL) {
         return new Promise((resolve) => {
             let s = document.createElement("script");
@@ -77,7 +79,6 @@
             document.head.appendChild(c);
         });
     }
-
     function cleanAnkiHTML(html) {
         return html
             .replace(/<br\s*[\/]?>/gi, "\n")
@@ -89,13 +90,11 @@
             .replace(/&amp;/gi, "&")
             .trim();
     }
-
     function render() {
-        ["front", "back"].forEach((part) => {
+        ["front", "back", "note"].forEach((part) => {
             const source = document.getElementById(`raw-${part}`);
             const target = document.getElementById(`${part}-content`);
             if (!source || !target) return;
-
             const md = new markdownit({
                 html: true,
                 typographer: true,
@@ -113,9 +112,11 @@
                     return "";
                 },
             }).use(markdownItMark);
-
             target.innerHTML = md.render(cleanAnkiHTML(source.innerHTML));
-            if (typeof renderMathInElement !== "undefined" && target.textContent.includes('$')) {
+            if (
+                typeof renderMathInElement !== "undefined" &&
+                target.textContent.includes("$")
+            ) {
                 renderMathInElement(target, {
                     delimiters: [
                         { left: "$$", right: "$$", display: true },
@@ -126,14 +127,13 @@
             }
         });
     }
-
     Promise.all(getResources)
-        .then(() => {
-            return getScript(
+        .then(() =>
+            getScript(
                 "_mhchem.js",
                 "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js",
-            );
-        })
+            ),
+        )
         .then(render)
         .catch(render);
 </script>

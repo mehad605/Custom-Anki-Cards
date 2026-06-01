@@ -169,3 +169,17 @@ tbody tr:hover td {
     border-color: var(--blue);
     box-shadow: 0 0 8px var(--blue);
 }
+/* --- NOTE CONTAINER --- */
+.note-container {
+    border-color: var(--yellow);
+}
+
+.note-label {
+    color: var(--yellow);
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}

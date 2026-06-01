@@ -6,11 +6,16 @@
     <div class="main-card content-container back-container" id="back-outer">
         <div id="back-content"></div>
     </div>
+    {{#Notes}}
+    <div class="separator"></div>
+    <div class="main-card content-container note-container" id="note-outer">
+        <div id="notes-content"></div>
+    </div>
+    {{/Notes}}
 </div>
-
 <div id="raw-front" style="display: none">{{Back}}</div>
 <div id="raw-back" style="display: none">{{Front}}</div>
-
+<div id="raw-notes" style="display: none">{{Notes}}</div>
 <script>
     var getResources = [
         getCSS(
@@ -42,7 +47,6 @@
             "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js",
         ),
     ];
-
     function getScript(path, altURL) {
         return new Promise((resolve) => {
             let s = document.createElement("script");
@@ -72,7 +76,6 @@
             document.head.appendChild(c);
         });
     }
-
     function cleanAnkiHTML(html) {
         return html
             .replace(/<br\s*[\/]?>/gi, "\n")
@@ -83,7 +86,6 @@
             .replace(/&amp;/gi, "&")
             .trim();
     }
-
     function render() {
         const md = new markdownit({
             html: true,
@@ -102,13 +104,15 @@
                 return "";
             },
         }).use(markdownItMark);
-
-        ["front", "back"].forEach((part) => {
+        ["front", "back", "notes"].forEach((part) => {
             const source = document.getElementById(`raw-${part}`);
             const target = document.getElementById(`${part}-content`);
             if (source && target) {
                 target.innerHTML = md.render(cleanAnkiHTML(source.innerHTML));
-                if (typeof renderMathInElement !== "undefined" && target.textContent.includes('$')) {
+                if (
+                    typeof renderMathInElement !== "undefined" &&
+                    target.textContent.includes("$")
+                ) {
                     renderMathInElement(target, {
                         delimiters: [
                             { left: "$$", right: "$$", display: true },
@@ -120,14 +124,13 @@
             }
         });
     }
-
     Promise.all(getResources)
-        .then(() => {
-            return getScript(
+        .then(() =>
+            getScript(
                 "_mhchem.js",
                 "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js",
-            );
-        })
+            ),
+        )
         .then(render)
         .catch(render);
 </script>
