@@ -54,6 +54,7 @@
             s.onerror = () => {
                 let s2 = document.createElement("script");
                 s2.onload = resolve;
+                s2.onerror = resolve;
                 s2.src = altURL;
                 document.head.appendChild(s2);
             };
@@ -69,6 +70,7 @@
             c.onerror = () => {
                 let c2 = document.createElement("link");
                 c2.rel = "stylesheet";
+                c2.onerror = resolve;
                 c2.href = altURL;
                 document.head.appendChild(c2);
             };
@@ -86,6 +88,15 @@
             .replace(/&amp;/gi, "&")
             .trim();
     }
+    function wrapTables(target) {
+        target.querySelectorAll("table").forEach(function (table) {
+            var wrapper = document.createElement("div");
+            wrapper.className = "table-scroll-wrapper";
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+    }
+
     function render() {
         const md = new markdownit({
             html: true,
@@ -109,6 +120,7 @@
             const target = document.getElementById(`${part}-content`);
             if (source && target) {
                 target.innerHTML = md.render(cleanAnkiHTML(source.innerHTML));
+                wrapTables(target);
                 if (
                     typeof renderMathInElement !== "undefined" &&
                     target.textContent.includes("$")

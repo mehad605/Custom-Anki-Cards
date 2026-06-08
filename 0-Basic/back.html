@@ -13,9 +13,11 @@
     </div>
     {{/Note}}
 </div>
+
 <div id="raw-front" style="display: none">{{Front}}</div>
 <div id="raw-back" style="display: none">{{Back}}</div>
 <div id="raw-note" style="display: none">{{Note}}</div>
+
 <script>
     var getResources = [
         getCSS(
@@ -47,6 +49,7 @@
             "https://cdn.jsdelivr.net/gh/Jwrede/Anki-KaTeX-Markdown/_markdown-it-mark.js",
         ),
     ];
+
     function getScript(path, altURL) {
         return new Promise((resolve) => {
             let s = document.createElement("script");
@@ -62,6 +65,7 @@
             document.head.appendChild(s);
         });
     }
+
     function getCSS(path, altURL) {
         return new Promise((resolve) => {
             let c = document.createElement("link");
@@ -79,6 +83,7 @@
             document.head.appendChild(c);
         });
     }
+
     function cleanAnkiHTML(html) {
         return html
             .replace(/<br\s*[\/]?>/gi, "\n")
@@ -90,29 +95,59 @@
             .replace(/&amp;/gi, "&")
             .trim();
     }
+
+    /*
+     * FIX: Android/mobile table overflow (columns cut off on right side)
+     *
+     * ISSUE: Anki's Android WebView does not reliably honour `overflow-x: auto`
+     * or `display: block` set directly on a <table> element via CSS. As a result,
+     * wide tables bleed off the right edge of the card with no way to scroll.
+     *
+     * FIX: After markdown renders the HTML into a target element, we use JavaScript
+     * to physically wrap every <table> inside that element in a new
+     * <div class="table-scroll-wrapper">. Because this div is a normal block element
+     * (not a table), `overflow-x: auto` works on it without any WebView quirks —
+     * the table scrolls horizontally inside it when wider than the card.
+     * We call this helper on all three sections (front, back, note) so tables
+     * are fixed no matter which section they appear in.
+     */
+    function wrapTables(target) {
+        target.querySelectorAll("table").forEach(function (table) {
+            var wrapper = document.createElement("div");
+            wrapper.className = "table-scroll-wrapper";
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+    }
+
     function render() {
+        const md = new markdownit({
+            html: true,
+            typographer: true,
+            highlight: (str, lang) => {
+                if (
+                    lang &&
+                    typeof hljs !== "undefined" &&
+                    hljs.getLanguage(lang)
+                ) {
+                    try {
+                        return hljs.highlight(str, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return "";
+            },
+        }).use(markdownItMark);
+
         ["front", "back", "note"].forEach((part) => {
             const source = document.getElementById(`raw-${part}`);
             const target = document.getElementById(`${part}-content`);
             if (!source || !target) return;
-            const md = new markdownit({
-                html: true,
-                typographer: true,
-                highlight: (str, lang) => {
-                    if (
-                        lang &&
-                        typeof hljs !== "undefined" &&
-                        hljs.getLanguage(lang)
-                    ) {
-                        try {
-                            return hljs.highlight(str, { language: lang })
-                                .value;
-                        } catch (__) {}
-                    }
-                    return "";
-                },
-            }).use(markdownItMark);
+
             target.innerHTML = md.render(cleanAnkiHTML(source.innerHTML));
+
+            // Wrap all tables in this section in a scrollable div
+            wrapTables(target);
+
             if (
                 typeof renderMathInElement !== "undefined" &&
                 target.textContent.includes("$")
@@ -127,13 +162,14 @@
             }
         });
     }
+
     Promise.all(getResources)
-        .then(() =>
-            getScript(
+        .then(() => {
+            return getScript(
                 "_mhchem.js",
                 "https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/mhchem.min.js",
-            ),
-        )
+            );
+        })
         .then(render)
         .catch(render);
 </script>

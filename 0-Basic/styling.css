@@ -2,17 +2,17 @@
 
 /* --- CORE PALETTE --- */
 :root {
-    --bg: #1e1e2e; /* Base */
-    --card-bg: #181825; /* Mantle */
-    --text: #cdd6f4; /* Text */
-    --subtext: #a6adc8; /* Subtext */
-    --blue: #89b4fa; /* Blue */
-    --mauve: #cba6f7; /* Mauve */
-    --surface: #313244; /* Surface0 */
-    --border: #45475a; /* Surface1 */
-    --red: #f38ba8; /* Red */
-    --green: #a6e3a1; /* Green */
-    --yellow: #f9e2af; /* Yellow */
+    --bg: #1e1e2e;
+    --card-bg: #181825;
+    --text: #cdd6f4;
+    --subtext: #a6adc8;
+    --blue: #89b4fa;
+    --mauve: #cba6f7;
+    --surface: #313244;
+    --border: #45475a;
+    --red: #f38ba8;
+    --green: #a6e3a1;
+    --yellow: #f9e2af;
 }
 
 /* --- RESET & LAYOUT --- */
@@ -54,7 +54,6 @@ body {
 }
 
 /* --- ANKI ARTIFACT FIXES --- */
-/* This stops the gray "background highlight" you saw in your images */
 code,
 pre,
 .hljs {
@@ -65,7 +64,7 @@ pre,
 
 /* --- CATPPUCCIN CODEBLOCKS --- */
 pre {
-    background: #000000 !important; /* Pure black for high contrast */
+    background: #000000 !important;
     padding: 18px;
     border-radius: 10px;
     overflow-x: auto;
@@ -82,7 +81,7 @@ code {
     font-size: 0.9em;
 }
 
-/* --- SYNTAX HIGHLIGHTING (SYNCED) --- */
+/* --- SYNTAX HIGHLIGHTING --- */
 .hljs {
     color: var(--text) !important;
 }
@@ -113,19 +112,33 @@ code {
 .hljs-literal,
 .hljs-type {
     color: #fab387 !important;
-} /* Peach */
+}
 .hljs-built_in {
     color: #94e2d5 !important;
-} /* Teal */
+}
 
 /* --- CATPPUCCIN TABLES --- */
+
+/*
+ * The JS in the card template wraps every <table> in a .table-scroll-wrapper div.
+ * This div is a plain block element, so overflow-x: auto works reliably on Android.
+ * The margin and border-radius live here on the wrapper; the table itself has none.
+ */
+.table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    margin: 1.5em 0;
+    border-radius: 8px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.5em 0;
     border-radius: 8px;
     overflow: hidden;
-    background: #11111b; /* Cracker */
+    background: #11111b;
+    margin: 0; /* margin is handled by .table-scroll-wrapper */
 }
 
 th,
@@ -133,6 +146,7 @@ td {
     padding: 12px 15px;
     border-bottom: 1px solid var(--border);
 }
+
 thead th {
     background: #11111b;
     color: var(--mauve);
@@ -141,13 +155,16 @@ thead th {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
 tbody td:first-child {
     color: var(--blue);
     font-weight: 600;
 }
+
 tbody tr:last-child td {
     border-bottom: none;
 }
+
 tbody tr:hover td {
     background-color: var(--surface);
 }
@@ -158,6 +175,7 @@ tbody tr:hover td {
     font-weight: bold;
     margin-bottom: 10px;
 }
+
 .match-chip {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -165,10 +183,12 @@ tbody tr:hover td {
     padding: 8px 12px;
     cursor: pointer;
 }
+
 .match-chip.selected {
     border-color: var(--blue);
     box-shadow: 0 0 8px var(--blue);
 }
+
 /* --- NOTE CONTAINER --- */
 .note-container {
     border-color: var(--yellow);

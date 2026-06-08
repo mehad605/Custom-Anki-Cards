@@ -106,7 +106,33 @@
         }).use(markdownItMark);
 
         target.innerHTML = md.render(cleanAnkiHTML(source.innerHTML));
-        if (typeof renderMathInElement !== "undefined" && target.textContent.includes('$')) {
+
+        /*
+         * FIX: Android/mobile table overflow (columns cut off on right side)
+         *
+         * ISSUE: Anki's Android WebView does not reliably honour `overflow-x: auto`
+         * or `display: block` set directly on a <table> element via CSS. As a result,
+         * wide tables bleed off the right edge of the card with no way to scroll.
+         *
+         * FIX: After markdown renders the HTML, we use JavaScript to physically wrap
+         * every <table> in a new <div class="table-scroll-wrapper">. Because this div
+         * is a normal block element (not a table), `overflow-x: auto` works on it
+         * without any WebView quirks — the table scrolls horizontally inside it when
+         * it is wider than the card. This approach is more robust than a pure CSS fix
+         * because it does not depend on the browser respecting non-standard display
+         * values on table elements.
+         */
+        target.querySelectorAll("table").forEach(function (table) {
+            var wrapper = document.createElement("div");
+            wrapper.className = "table-scroll-wrapper";
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+
+        if (
+            typeof renderMathInElement !== "undefined" &&
+            target.textContent.includes("$")
+        ) {
             renderMathInElement(target, {
                 delimiters: [
                     { left: "$$", right: "$$", display: true },
