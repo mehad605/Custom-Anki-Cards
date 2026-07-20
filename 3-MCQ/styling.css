@@ -333,3 +333,17 @@ code {
 .hljs-variable {
     color: var(--ctp-red) !important;
 }
+
+/* --- OVERFLOW FIXES --- */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+}
+.main-card {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+

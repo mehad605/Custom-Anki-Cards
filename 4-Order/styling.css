@@ -175,3 +175,17 @@ code {
     margin-bottom: 5px;
     letter-spacing: 1px;
 }
+
+/* --- OVERFLOW FIXES --- */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+}
+.main-card {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+

@@ -203,3 +203,17 @@ tbody tr:hover td {
     margin-bottom: 12px;
     opacity: 0.8;
 }
+
+/* --- OVERFLOW FIXES --- */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+}
+.main-card {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
